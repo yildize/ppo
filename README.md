@@ -1,1 +1,1 @@
-# ppo implementation
+# Playing around with Proximal Policy Optimization.
