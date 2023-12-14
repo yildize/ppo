@@ -6,18 +6,20 @@ import torch
 import torch.nn as nn
 import random
 
+from utils.render_wrapper import RenderWrapper
 from utils.utils import MultivariateGaussianDist, PerformanceLogger, batchify
 from networks import ActorCriticNetworks
 from rollout_buffer import RolloutBuffer
 from rollout_computer import RolloutComputer
-from typing import Tuple
+from typing import Tuple, Union
 from utils.hyperparams import Hyperparams
 
 
 class PPO:
     """ This is the class in which I have implemented to reproduce the results of original PPO paper."""
+    env: Union[gym.Env, RenderWrapper]
 
-    def __init__(self, env: gym.Env, hyperparams:Hyperparams = Hyperparams()):
+    def __init__(self, env: Union[gym.Env, RenderWrapper], hyperparams:Hyperparams = Hyperparams()):
         # The environment we are trying to solve.
         self.env = env
         self.hyperparams = hyperparams
@@ -30,9 +32,15 @@ class PPO:
         # Get the number of observations and number of actions using the environment
         self.num_observations, self.num_actions = env.observation_space.shape[0], env.action_space.shape[0]
         # I will be using a multivariate gaussian distribution to introduce exploration to the agent.
-        self.multivariate_gauss_dist = MultivariateGaussianDist(num_actions=self.num_actions, std_dev_start=self.hyperparams.std_start, std_dev_end=self.hyperparams.std_end)
+        self.multivariate_gauss_dist = MultivariateGaussianDist(num_actions=self.num_actions, std_dev_start=self.hyperparams.std_start,
+                                                                std_dev_end=self.hyperparams.std_end)
         # Construct the actor and critic networks and optimizers according to environment observation and action spaces:
-        self.actor_critic_networks = ActorCriticNetworks(num_observations=self.num_observations, num_actions=self.num_actions, multivariate_gauss_dist=self.multivariate_gauss_dist,  lr=self.hyperparams.lr, learn_std=self.hyperparams.learn_std,  hidden_dim=64, tanh_acts=self.hyperparams.tanh_acts)
+        self.actor_critic_networks = ActorCriticNetworks(num_observations=self.num_observations, num_actions=self.num_actions,
+                                                         multivariate_gauss_dist=self.multivariate_gauss_dist,  lr=self.hyperparams.lr,
+                                                         learn_std=self.hyperparams.learn_std,  hidden_dim=64,
+                                                         num_hidden_layers_actor= hyperparams.num_hidden_layers_actor,
+                                                         num_hidden_layers_critic=hyperparams.num_hidden_layers_critic,
+                                                         tanh_acts=self.hyperparams.tanh_acts)
         # Create a rollout computer to abstract the computations needed.
         self.rollout_computer = RolloutComputer()
         # Create a simple logger:

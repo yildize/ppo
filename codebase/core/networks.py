@@ -12,27 +12,32 @@ class MLP(nn.Module):
     we could have used more complex networks, it is relatively easy to do it through torch. But the main point
     of PPO is not the network architectures but more like a way of learning their parameters."""
 
-    def __init__(self, input_dim:int, output_dim:int, hidden_dim:int, learn_std=False, tanh_acts=False):
+    def __init__(self, input_dim:int, output_dim:int, hidden_dim:int, learn_std=False, tanh_acts=False, num_hidden_layers=2):
         super().__init__()
-        self.tanh_acts = tanh_acts
+        self.activation_fn = F.tanh if tanh_acts else F.relu
         self.learn_std = learn_std
+
         # Define the MLP layers:
         self.linear_layer1 = nn.Linear(input_dim, hidden_dim)
-        self.linear_layer2 = nn.Linear(hidden_dim, hidden_dim)
+        # I will provide hidden layers as a list to make it more flexible
+        self.hidden_layers = nn.ModuleList([nn.Linear(hidden_dim, hidden_dim) for _ in range(num_hidden_layers)])
         self.linear_layer3 = nn.Linear(hidden_dim, output_dim)
+
+        # Define learnable std params if specified
         if learn_std: self.log_std = nn.Parameter(torch.zeros(output_dim))
 
     def forward(self, obs):
         """ Define the forward propagation logic. Torch will handle the gradient calculation. """
         # Conversion from numpy array to torch tensor just in case:
-        obs = torch.tensor(obs, dtype=torch.float32) if isinstance(obs, np.ndarray) else obs
+        #obs = torch.tensor(obs, dtype=torch.float32) if isinstance(obs, np.ndarray) else obs
+        obs = torch.as_tensor(obs, dtype=torch.float32)
 
         # Now let's calculate the forward passes:
-        a1 = F.tanh(self.linear_layer1(obs)) if self.tanh_acts else F.relu(self.linear_layer1(obs))
-        a2 = F.tanh(self.linear_layer2(a1)) if self.tanh_acts else F.relu(self.linear_layer2(a1))
-        #a3 = F.relu(self.linear_layer3(a2))
-        logits = self.linear_layer3(a2)
+        a = self.activation_fn(self.linear_layer1(obs))  # a = F.tanh(self.linear_layer1(obs)) if self.tanh_acts else F.relu(self.linear_layer1(obs))
+        for hl in self.hidden_layers: a = self.activation_fn(hl(a))
+        logits = self.linear_layer3(a)
 
+        # If stds are learnable output stds along with the logits
         if self.learn_std:
             return logits, torch.exp(self.log_std)  # returns mean and std
 
@@ -43,10 +48,10 @@ class ActorCriticNetworks:
     """ This is a utility container collecting all the network instances and their optimizers to provide
     ease of usage. Our PPO learner instance will utilize an actor critic instance."""
 
-    def __init__(self, num_observations:int, num_actions:int, hidden_dim:int, multivariate_gauss_dist:MultivariateGaussianDist, learn_std:bool, tanh_acts:bool,  lr=3e-4):
+    def __init__(self, num_observations:int, num_actions:int, hidden_dim:int, num_hidden_layers_actor: int, num_hidden_layers_critic:int,  multivariate_gauss_dist:MultivariateGaussianDist, learn_std:bool, tanh_acts:bool,  lr=3e-4):
         # Construct the actor and critic networks according to environment observation and action spaces:
-        self.actor = MLP(input_dim=num_observations, output_dim=num_actions, hidden_dim=hidden_dim, learn_std=learn_std, tanh_acts=tanh_acts)
-        self.critic = MLP(input_dim=num_observations, output_dim=1, hidden_dim=hidden_dim, tanh_acts=tanh_acts)
+        self.actor = MLP(input_dim=num_observations, output_dim=num_actions, hidden_dim=hidden_dim, learn_std=learn_std, tanh_acts=tanh_acts, num_hidden_layers=num_hidden_layers_actor)
+        self.critic = MLP(input_dim=num_observations, output_dim=1, hidden_dim=hidden_dim, tanh_acts=tanh_acts, num_hidden_layers=num_hidden_layers_critic)
 
         # Set lr we can use it later to update it.
         self.lr = self.initial_lr = lr

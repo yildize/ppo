@@ -31,3 +31,8 @@ class Hyperparams:
     std_end:float = 0.01
 
     tanh_acts:bool = False
+
+    # Additional hyperparams
+    num_hidden_layers_actor = 2
+    num_hidden_layers_critic =  2
+

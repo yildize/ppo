@@ -4,6 +4,7 @@ from core.ppo import PPO
 from utils.plotter import Plotter
 from typing import List
 
+from utils.render_wrapper import RenderWrapper
 from utils.utils import PerformanceLogger, create_directory_if_not_exists
 
 
@@ -30,7 +31,7 @@ class Trainer:
     def __train_model(self, hyperparams:Hyperparams) -> PerformanceLogger:
         """ Runs a single experiment for the given environment, seed and timestep"""
         # Create the env
-        env = gym.make(self.env_name)
+        env = RenderWrapper(self.env_name)
 
         # Create default hyperparams, I will me modifying the seed
         #hyperparams = Hyperparams()
