@@ -2,7 +2,8 @@ import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 from typing import List, Tuple
-from utils import PerformanceLogger
+
+from utils.utils import PerformanceLogger
 
 
 class Plotter:

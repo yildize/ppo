@@ -1,9 +1,10 @@
 import gym
-from hyperparams import Hyperparams
-from ppo import PPO
-from plotter import Plotter
+from utils.hyperparams import Hyperparams
+from core.ppo import PPO
+from utils.plotter import Plotter
 from typing import List
-from utils import PerformanceLogger, create_directory_if_not_exists
+
+from utils.utils import PerformanceLogger, create_directory_if_not_exists
 
 
 class Trainer:

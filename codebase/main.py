@@ -1,6 +1,6 @@
-from trainer import Trainer
-from demo import Demonstrator
-from hyperparams import Hyperparams
+from convenience.trainer import Trainer
+from convenience.demo import Demonstrator
+from utils.hyperparams import Hyperparams
 
 # This is the main script that a training or demo can be performed as follows:
 if __name__ == "__main__":

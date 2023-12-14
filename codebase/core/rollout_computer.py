@@ -1,6 +1,6 @@
 import torch
 from typing import Tuple, List
-from utils import MultivariateGaussianDist
+from utils.utils import MultivariateGaussianDist
 import numpy as np
 
 class RolloutComputer:

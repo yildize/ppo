@@ -3,7 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 import numpy as np
 from torch.optim import Adam
-from utils import MultivariateGaussianDist
+from utils.utils import MultivariateGaussianDist
 from typing import Optional, Tuple
 
 

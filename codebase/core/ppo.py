@@ -6,13 +6,12 @@ import torch
 import torch.nn as nn
 import random
 
-from utils import MultivariateGaussianDist, PerformanceLogger
+from utils.utils import MultivariateGaussianDist, PerformanceLogger, batchify
 from networks import ActorCriticNetworks
 from rollout_buffer import RolloutBuffer
 from rollout_computer import RolloutComputer
 from typing import Tuple
-from utils import batchify
-from hyperparams import Hyperparams
+from utils.hyperparams import Hyperparams
 
 
 class PPO:

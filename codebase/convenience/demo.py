@@ -2,8 +2,8 @@ import numpy as np
 import torch
 import gym
 
-from utils import find_first_file_in_directory
-from networks import MLP
+from utils.utils import find_first_file_in_directory
+from core.networks import MLP
 import time
 
 class Demonstrator:
