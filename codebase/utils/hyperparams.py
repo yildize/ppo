@@ -35,7 +35,7 @@ class Hyperparams:
     tanh_acts: bool = False
 
     # Additional hyperparams
-    normalize_obs: bool = False
+    normalize_obs: bool = True
     hidden_dim: int = 64
     num_hidden_layers_actor: int = 2
     num_hidden_layers_critic: int = 2
