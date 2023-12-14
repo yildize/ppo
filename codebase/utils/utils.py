@@ -6,8 +6,8 @@ from torch.distributions import MultivariateNormal
 from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
-
-
+from datetime import datetime
+import pickle
 
 class MultivariateGaussianDist:
     """ I will use this class to represent my action distribution. The actor network will provide me
@@ -100,10 +100,22 @@ def create_directory_if_not_exists(directory_path):
     else:
         print(f"Directory '{directory_path}' already exists.")
 
-def find_first_file_in_directory(directory_path):
-    """Finds the first file in the given directory path."""
+def find_first_file_in_directory(directory_path, containing:str=None):
+    """By default it finds the first file in the given directory path. If 'containing' is not None,
+     it will return the first file path containing the specified str inside its name."""
     for root, dirs, files in os.walk(directory_path):
         for file in files:
             # Return the full path of the first file found
-            return os.path.join(root, file)
+            if containing is None: return os.path.join(root, file)
+            elif containing in file: return os.path.join(root, file)
+
     return None
+
+def get_current_date_time_str():
+    return datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+def load_with_pickle(file_path:str):
+    # Load the object from the file
+    with open(file_path, 'rb') as f:
+        file = pickle.load(f)
+    return file

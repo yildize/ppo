@@ -1,6 +1,7 @@
 import gym
 from gym.wrappers import NormalizeObservation
 import pickle
+import numpy as np
 
 
 class RenderWrapper:
@@ -38,3 +39,24 @@ class RenderWrapper:
         else:
             print("You've tried to save obs_rms but normalization is not enabled in this environment.")
             return
+
+    def set_obs_rms(self, obs_rms):
+        """ Sets the obs_rms of the inner envs."""
+        if self.normalize_obs:
+            self._env.obs_rms = obs_rms
+            self._env_render.obs_rms = obs_rms
+        else:
+            print("You are trying to set obs_rms of an environment that is not normalized!")
+
+    def freeze_obs_rmss(self):
+        """ Freezes the obs_rms update by method injection."""
+        if not self.normalize_obs: raise Exception("You are trying to freeze obs_rmss but normalize_obs=False!")
+
+        def new_normalize_to_inject(normalize_obs_instance, obs):
+            """This method is just there to be injected to NormalizeObservation wrapper to prevent mean and variance updates.
+            It is not a good practice, but python allows dynamic method injection."""
+            return (obs - normalize_obs_instance.obs_rms.mean) / np.sqrt(normalize_obs_instance.obs_rms.var + normalize_obs_instance.epsilon)
+
+        # Assuming 'obj' is an instance of NormalizeObservation
+        self._env.normalize = new_normalize_to_inject.__get__(self._env, NormalizeObservation)
+        self._env_render.normalize = new_normalize_to_inject.__get__(self._env_render, NormalizeObservation)

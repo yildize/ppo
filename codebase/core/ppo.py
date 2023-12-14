@@ -8,9 +8,9 @@ import random
 
 from utils.render_wrapper import RenderWrapper
 from utils.utils import MultivariateGaussianDist, PerformanceLogger, batchify
-from networks import ActorCriticNetworks
-from rollout_buffer import RolloutBuffer
-from rollout_computer import RolloutComputer
+from core.networks import ActorCriticNetworks
+from core.rollout_buffer import RolloutBuffer
+from core.rollout_computer import RolloutComputer
 from typing import Tuple, Union
 from utils.hyperparams import Hyperparams
 
@@ -37,7 +37,7 @@ class PPO:
         # Construct the actor and critic networks and optimizers according to environment observation and action spaces:
         self.actor_critic_networks = ActorCriticNetworks(num_observations=self.num_observations, num_actions=self.num_actions,
                                                          multivariate_gauss_dist=self.multivariate_gauss_dist,  lr=self.hyperparams.lr,
-                                                         learn_std=self.hyperparams.learn_std,  hidden_dim=64,
+                                                         learn_std=self.hyperparams.learn_std,  hidden_dim=hyperparams.hidden_dim,
                                                          num_hidden_layers_actor= hyperparams.num_hidden_layers_actor,
                                                          num_hidden_layers_critic=hyperparams.num_hidden_layers_critic,
                                                          tanh_acts=self.hyperparams.tanh_acts)
