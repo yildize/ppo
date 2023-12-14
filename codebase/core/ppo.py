@@ -29,11 +29,14 @@ class PPO:
         # I will be working with continuous control problems (main focus on the paper.)
         if type(env.observation_space) != gym.spaces.Box or type(env.action_space) != gym.spaces.Box:
             raise TypeError("This implementation expects a continous state and action spaces.")
+
         # Get the number of observations and number of actions using the environment
         self.num_observations, self.num_actions = env.observation_space.shape[0], env.action_space.shape[0]
+
         # I will be using a multivariate gaussian distribution to introduce exploration to the agent.
         self.multivariate_gauss_dist = MultivariateGaussianDist(num_actions=self.num_actions, std_dev_start=self.hyperparams.std_start,
                                                                 std_dev_end=self.hyperparams.std_end)
+
         # Construct the actor and critic networks and optimizers according to environment observation and action spaces:
         self.actor_critic_networks = ActorCriticNetworks(num_observations=self.num_observations, num_actions=self.num_actions,
                                                          multivariate_gauss_dist=self.multivariate_gauss_dist,  lr=self.hyperparams.lr,
@@ -41,6 +44,7 @@ class PPO:
                                                          num_hidden_layers_actor= hyperparams.num_hidden_layers_actor,
                                                          num_hidden_layers_critic=hyperparams.num_hidden_layers_critic,
                                                          tanh_acts=self.hyperparams.tanh_acts)
+
         # Create a rollout computer to abstract the computations needed.
         self.rollout_computer = RolloutComputer()
         # Create a simple logger:
