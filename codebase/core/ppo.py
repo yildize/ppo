@@ -72,10 +72,10 @@ class PPO:
 
             if self.hyperparams.advantage_calc == "classic":
                 # Calculate the normalized advantage estimate for each state-action using the estimated_qas and V. Remember A(s,a) = Q(s,a) - V(s)
-                A = self.rollout_computer.advantage_estimates(estimated_qas=monte_carlo_qas, estimated_values=V.detach(), normalized=True) # grad_require False
+                A = self.rollout_computer.advantage_estimates(estimated_qas=monte_carlo_qas, estimated_values=V.detach(), normalize=self.hyperparams.adv_norm_method) # grad_require False
                 #[len(rollout)]
             else:
-                A = self.rollout_computer.gae(rewards=rollout.rewards, values=V.detach(), last_state_val=self.actor_critic_networks.critic(torch.from_numpy(rollout.next_states[-1]).float()).detach(),  dones=rollout.dones, gamma=self.hyperparams.gamma, gae_lambda=self.hyperparams.gae_lambda)
+                A = self.rollout_computer.gae(rewards=rollout.rewards, values=V.detach(), last_state_val=self.actor_critic_networks.critic(torch.from_numpy(rollout.next_states[-1]).float()).detach(),  dones=rollout.dones, gamma=self.hyperparams.gamma, gae_lambda=self.hyperparams.gae_lambda, normalize=self.hyperparams.adv_norm_method)
 
             timestep += len(rollout)  # update timestep
             rollout_no += 1  # update current rollout no

@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from utils.enums import AdvNormMethods
+
 
 @dataclass
 class Hyperparams:
@@ -33,6 +35,8 @@ class Hyperparams:
     tanh_acts:bool = False
 
     # Additional hyperparams
-    num_hidden_layers_actor = 2
-    num_hidden_layers_critic =  2
+    normalize_obs = True
+    num_hidden_layers_actor:int = 2
+    num_hidden_layers_critic:int = 2
+    adv_norm_method: AdvNormMethods = AdvNormMethods.range_scale
 

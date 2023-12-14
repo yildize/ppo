@@ -31,7 +31,7 @@ class Trainer:
     def __train_model(self, hyperparams:Hyperparams) -> PerformanceLogger:
         """ Runs a single experiment for the given environment, seed and timestep"""
         # Create the env
-        env = RenderWrapper(self.env_name)
+        env = RenderWrapper(env_name=self.env_name, normalize_obs=hyperparams.normalize_obs)
 
         # Create default hyperparams, I will me modifying the seed
         #hyperparams = Hyperparams()

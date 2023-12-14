@@ -1,5 +1,7 @@
 import torch
 from typing import Tuple, List
+
+from utils.enums import AdvNormMethods
 from utils.utils import MultivariateGaussianDist
 import numpy as np
 
@@ -60,14 +62,15 @@ class RolloutComputer:
         return log_probs, act_dists.entropy()
 
     @staticmethod
-    def advantage_estimates(estimated_qas:torch.Tensor, estimated_values:torch.Tensor, normalized:bool=True) -> torch.Tensor:
+    def advantage_estimates(estimated_qas:torch.Tensor, estimated_values:torch.Tensor, normalize:AdvNormMethods=AdvNormMethods.normalize) -> torch.Tensor:
         """ Calculate the basic advantage estimates using rewards to go and estimated values."""
         A = estimated_qas - estimated_values
-        if normalized: A = (A - A.mean()) / (A.std() + 1e-10) # # 1e-8 is just use to avoid possible divide by 0 condition.
+        if normalize == AdvNormMethods.normalize: A = (A - A.mean()) / (A.std() + 1e-10) # # 1e-8 is just use to avoid possible divide by 0 condition.
+        elif normalize == AdvNormMethods.range_scale: A = A/(A.max() - A.min()) # keeps the signs just scales them down
         return A
 
     @staticmethod
-    def gae(rewards:List[float], values:List[float], last_state_val:float, dones:List[bool], gamma:float, gae_lambda:float):
+    def gae(rewards:List[float], values:List[float], last_state_val:float, dones:List[bool], gamma:float, gae_lambda:float, normalize:AdvNormMethods = AdvNormMethods.normalize):
         """ Generalized Advantage Estimates calculation. It provides a tradeoff between variance and bias between estimates
         through the gae_lambda parameter. """
         rollout_len = len(rewards)
@@ -84,7 +87,11 @@ class RolloutComputer:
                 delta = rewards[t] + gamma * next_val - values[t]
             gae = delta + gamma * gae_lambda * gae * (1 - dones[t])  # Reset to 0 if the state is terminal
             advantages[t] = gae
-        advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-10)
+
+        # Apply normalization
+        if normalize == AdvNormMethods.normalize: advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-10) # # 1e-8 is just use to avoid possible divide by 0 condition.
+        elif normalize == AdvNormMethods.range_scale: advantages = advantages/(advantages.max() - advantages.min()) # keeps the signs just scales them down
+
         return advantages
 
     @staticmethod
