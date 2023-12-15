@@ -26,6 +26,16 @@ class Joystick:
         return self.joystick.get_axis(0)
 
     @property
+    def axis_1(self):
+        pygame.event.pump()
+        return self.joystick.get_axis(1)
+
+    @property
+    def axis_2(self):
+        pygame.event.pump()
+        return self.joystick.get_axis(2)
+
+    @property
     def activate_injection(self):
         pygame.event.pump()
         return self.joystick.get_button(self.yes_button)

@@ -24,6 +24,7 @@ class Trainer:
     def train(self, session_name:str):
         """ Runs multiple experiments for each environment. Performance plot will be saved to the provided path."""
         logs = [] # will store performances for each seeded experiment.
+
         for i, hyperparams in enumerate(self.hyperparams_list):
             log = self.__train_model(hyperparams=hyperparams, session_name=session_name, session_train_index=i)
             logs.append(log)

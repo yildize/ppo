@@ -52,6 +52,7 @@ class Demonstrator:
         for t in range(self.max_episode_length):
             if self.render: time.sleep(self.step_delay)
             action = self._decide_action(state=s)
+            print("action:", action)
             s, r, done, truncated, _ = self.env.step(action=action)
             episode_rewards.append(r)
             if done or truncated: break

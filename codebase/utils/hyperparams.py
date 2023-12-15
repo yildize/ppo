@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from utils.enums import AdvNormMethods
+from utils.enums import AdvNormMethods, InjectionTypes, AssitiveActors
 
 
 @dataclass
@@ -39,5 +39,13 @@ class Hyperparams:
     hidden_dim: int = 64
     num_hidden_layers_actor: int = 2
     num_hidden_layers_critic: int = 2
-    adv_norm_method: AdvNormMethods = AdvNormMethods.normalize  # AdvNormMethods.range_scale
+    adv_norm_method: AdvNormMethods = AdvNormMethods.range_scale  # AdvNormMethods.range_scale
+
+
+    # Injection hyperparams
+    injection_enabled: bool = False
+    injection_type: InjectionTypes = InjectionTypes.decremental
+    assistive_actor_type: AssitiveActors = AssitiveActors.mountaincar_basic
+    assist_duration_perc: float = 0.01
+    decrement_noise_std: float = 0.15
 

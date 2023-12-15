@@ -6,18 +6,22 @@ import torch
 import torch.nn as nn
 import random
 
+from injection.base_action_injector import BaseActionInjector
+from injection.decremental_injector import DecrementalInjector
+from utils.enums import InjectionTypes
 from utils.render_wrapper import RenderWrapper
 from utils.utils import MultivariateGaussianDist, PerformanceLogger, batchify
 from core.networks import ActorCriticNetworks
 from core.rollout_buffer import RolloutBuffer
 from core.rollout_computer import RolloutComputer
-from typing import Tuple, Union
+from typing import Tuple, Union, List, Optional
 from utils.hyperparams import Hyperparams
 
 
 class PPO:
     """ This is the class in which I have implemented to reproduce the results of original PPO paper."""
     env: Union[gym.Env, RenderWrapper]
+    injector: Optional[BaseActionInjector]
 
     def __init__(self, env: Union[gym.Env, RenderWrapper], hyperparams:Hyperparams = Hyperparams()):
         # The environment we are trying to solve.
@@ -26,12 +30,14 @@ class PPO:
         # Seed everything
         self.seed_session(seed=self.hyperparams.seed)
 
+
         # I will be working with continuous control problems (main focus on the paper.)
         if type(env.observation_space) != gym.spaces.Box or type(env.action_space) != gym.spaces.Box:
             raise TypeError("This implementation expects a continous state and action spaces.")
 
         # Get the number of observations and number of actions using the environment
         self.num_observations, self.num_actions = env.observation_space.shape[0], env.action_space.shape[0]
+
 
         # I will be using a multivariate gaussian distribution to introduce exploration to the agent.
         self.multivariate_gauss_dist = MultivariateGaussianDist(num_actions=self.num_actions, std_dev_start=self.hyperparams.std_start,
@@ -50,15 +56,33 @@ class PPO:
         # Create a simple logger:
         self.perf_logger = PerformanceLogger()
 
+        # Count episodes this will be passed to other objects so to keep it reachable from everywhere use a list.
+        self.episode_count = [0]
+
+
+
+
     def learn(self, total_timesteps, verbose=True):
         """ This is the method where learning magic happens. All the high level PPO logic happens here. I have abstracted detailed calculations inside the rollout_computer."""
+
+        # Injector
+        self.injector = None
+        if self.hyperparams.injection_enabled and self.hyperparams.injection_type == InjectionTypes.decremental:
+            self.injector = DecrementalInjector(actor=self.actor_critic_networks.actor,
+                                                multivariate_gauss_dist=self.multivariate_gauss_dist,
+                                                total_timesteps=total_timesteps,
+                                                assitive_actor_type=self.hyperparams.assistive_actor_type,
+                                                episode_counter=self.episode_count,
+                                                assist_duration_perc=self.hyperparams.assist_duration_perc,
+                                                decrement_noise_std=self.hyperparams.decrement_noise_std)
 
         self.actor_critic_networks.total_timesteps = total_timesteps # this will be used to update learning rate by time.
         self.multivariate_gauss_dist.total_timesteps = total_timesteps # this will be used to update std by time.
 
         # Learn until total_timesteps is reached!
-        timestep, rollout_no = 0, 0
-        while timestep < total_timesteps:
+        self.timestep, rollout_no = 0, 0
+        self.total_timesteps = total_timesteps
+        while self.timestep < total_timesteps:
             # Collect a rollout
             rollout = self.collect_a_rollout()
 
@@ -81,7 +105,7 @@ class PPO:
             else:
                 A = self.rollout_computer.gae(rewards=rollout.rewards, values=V.detach(), last_state_val=self.actor_critic_networks.critic(torch.from_numpy(rollout.next_states[-1]).float()).detach(),  dones=rollout.dones, gamma=self.hyperparams.gamma, gae_lambda=self.hyperparams.gae_lambda, normalize=self.hyperparams.adv_norm_method)
 
-            timestep += len(rollout)  # update timestep
+            self.timestep += len(rollout) # update timestep
             rollout_no += 1  # update current rollout no
 
             # For each rollout, we'll be using the samples repeatedly to increase sample efficiency with the help of clipped ppo loss preventing destructive updates.
@@ -109,19 +133,19 @@ class PPO:
                     # Update the actor and critic networks. Optionally use gradient clipping.
                     self.actor_critic_networks.take_a_gradient_step(actor_loss=actor_loss, critic_loss=critic_loss, clip_grad=self.hyperparams.clip_grad, max_grad=self.hyperparams.max_grad)
                 # Check if current policy distribution is diverged too much from the initial one, if it is the case we'll stop using those samples to prevent destructive updates.
-                if self.rollout_computer.new_policy_is_diverged(initial_log_probs_tensor, importance_sampling_ratios, curr_log_probs,self.hyperparams.max_kl_divergence):
-                    print("kl diverged")
-                    break
+                #if self.rollout_computer.new_policy_is_diverged(initial_log_probs_tensor, importance_sampling_ratios, curr_log_probs,self.hyperparams.max_kl_divergence):
+                #    print("kl diverged")
+                #    break
 
             # We can use learning rate annealing to stabilize learning by time.
-            self.actor_critic_networks.reduce_learning_rate(curr_timestep=timestep, min_lr=self.hyperparams.min_lr)
+            self.actor_critic_networks.reduce_learning_rate(curr_timestep=self.timestep, min_lr=self.hyperparams.min_lr)
             # Similarly we can update std deviation for the policy distribution to reduce exploration by time.
-            self.multivariate_gauss_dist.update_cov_matrix(timestep=timestep)
+            self.multivariate_gauss_dist.update_cov_matrix(timestep=self.timestep)
 
             # Record rollout performance we'll be using them to obtain performance plots.
-            self.perf_logger.add(avg_episodic_lengths=rollout.avg_episodic_lengths, avg_episodic_rewards=rollout.avg_episodic_rewards, timestep=timestep)
+            self.perf_logger.add(avg_episodic_lengths=rollout.avg_episodic_lengths, avg_episodic_rewards=rollout.avg_episodic_rewards, timestep=self.timestep)
             if verbose:
-                print(f"Rollout No: {rollout_no} - Timestep {timestep}/{total_timesteps}")
+                print(f"Rollout No: {rollout_no} - Timestep {self.timestep}/{total_timesteps}")
                 print(f"Avg. Eps Len: {rollout.avg_episodic_lengths:.2f}, Avg. Eps Rew: {rollout.avg_episodic_rewards:.2f}")
                 print(f"----------------------------------------------------")
 
@@ -141,6 +165,7 @@ class PPO:
         while t < self.hyperparams.rollout_len:
             s,_ = self.env.reset(seed=random.randint(0, 100000))
             episode_len, total_episode_reward = self.play_an_episode(s=s, rollout_buffer=rollout_buffer)
+            self.episode_count[0] += 1  # increase the total number of episodes played so far.
             eps_lens.append(episode_len)
             eps_rews.append(total_episode_reward)
             t += episode_len
@@ -154,18 +179,20 @@ class PPO:
     def play_an_episode(self, s, rollout_buffer:RolloutBuffer) -> Tuple[int, float]:
         """ This method is used to collect transitions by playing a single episode starting from s. An episode can end when
         the environment returns Done, Truncated or the max_episode_len is reached."""
-
         episode_rewards = []
 
         for eps_t in range(self.hyperparams.max_episode_len):
             # Decide action (no grad calculated)
-            action, log_prob_a = self.actor_critic_networks.sample_an_action(state=s)
-            #action, log_prob_a = self.get_action(s)
+            if self.injector is not None: action, log_prob_a = self.injector.inject_action(state=s, current_timestep=self.timestep)
+            else: action, log_prob_a = self.actor_critic_networks.sample_an_action(state=s)
+
             # Take a step in the environment
             s_next, r, done, truncated, _ = self.env.step(action)
+
             # Store the transitions later we'll be learning from those
             rollout_buffer.add_transition(state=s, action=action, action_log_prob=log_prob_a, next_state=s_next,reward=r, done=done, truncated=truncated)
             episode_rewards.append(r)
+
             # Update state:
             s = s_next
             # End episode when done is True
