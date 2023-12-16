@@ -14,7 +14,7 @@ class Trainer:
     """ This class is a utility class to run multiple experiments/trainings with the same environment and plot the results. Running multiple experiments
     will provide us a better confidence on the performance of our algorithm."""
 
-    def __init__(self, env_name:str, hyperparams_list:List[Hyperparams], total_timesteps:int, plot:bool=True, plot_points:int=1000):
+    def __init__(self, env_name:str, hyperparams_list:List[Hyperparams], total_timesteps:int, plot:bool=True, plot_points:int=10000):
         self.total_timesteps = total_timesteps
         self.env_name = env_name
         self.hyperparams_list = hyperparams_list

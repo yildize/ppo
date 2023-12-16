@@ -10,6 +10,7 @@ from injection.base_action_injector import BaseActionInjector
 from injection.decremental_injector import DecrementalInjector
 from injection.scheduled_injector import ScheduledInjector
 from utils.enums import InjectionTypes
+from utils.plot_insights import InsightPlots
 from utils.render_wrapper import RenderWrapper
 from utils.utils import MultivariateGaussianDist, PerformanceLogger, batchify
 from core.networks import ActorCriticNetworks
@@ -105,6 +106,7 @@ class PPO:
             states_tensor, actions_tensor, initial_log_probs_tensor = self.rollout_computer.convert_list_to_tensor(rollout.states), self.rollout_computer.convert_list_to_tensor(rollout.actions), self.rollout_computer.convert_list_to_tensor(rollout.action_log_probs)
             #[len(rollout), num_states], [len(rollout), num_actions], [len(rollout)]
 
+
             # Calculate estimated Q(a,s) values for each state-action in the rollout
             monte_carlo_qas = self.rollout_computer.estimated_qas(next_states=rollout.next_states, rewards=rollout.rewards, dones=rollout.dones, truncateds=rollout.truncateds, critic=self.actor_critic_networks.critic, discount_factor=self.hyperparams.gamma) # grad_required False
             #[len(rollout)]
@@ -119,6 +121,10 @@ class PPO:
                 #[len(rollout)]
             else:
                 A = self.rollout_computer.gae(rewards=rollout.rewards, values=V.detach(), last_state_val=self.actor_critic_networks.critic(torch.from_numpy(rollout.next_states[-1]).float()).detach(),  dones=rollout.dones, gamma=self.hyperparams.gamma, gae_lambda=self.hyperparams.gae_lambda, normalize=self.hyperparams.adv_norm_method)
+
+
+            ip = InsightPlots(A=A, states_tensor=states_tensor, actions_tensor=actions_tensor, initial_log_probs_tensor=initial_log_probs_tensor,
+                              actor=self.actor_critic_networks.actor)
 
             # self.timestep += len(rollout) # I instead update the timestep after each env.step()
             rollout_no += 1  # update current rollout no
