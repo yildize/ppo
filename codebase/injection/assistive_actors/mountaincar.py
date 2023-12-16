@@ -35,7 +35,7 @@ class DummyMountainCarAssitiveActor(BaseMountainCarAssistiveActor):
         return rec_action
 
 
-class JoystickAssistiveActor(BaseMountainCarAssistiveActor):
+class JoystickMountainCarAssistiveActor(BaseMountainCarAssistiveActor):
     """ This assitive actor uses the axis0 input from the joystick to provide actions"""
     def __init__(self):
         super().__init__()
@@ -43,3 +43,14 @@ class JoystickAssistiveActor(BaseMountainCarAssistiveActor):
 
     def _action_strategy(self):
         return torch.tensor([self.joystick.axis_0], dtype=torch.float32)
+
+
+class SB3AssitiveActor(BaseMountainCarAssistiveActor):
+    """ Assitive actors can be other trained actors as well, rather than being rule based dummy logics.
+    But pay attention to normalization compatability in this case."""
+    def __init__(self):
+        super().__init__()
+        self.actor = ...
+
+    def _action_strategy(self):
+        ...

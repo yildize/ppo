@@ -1,5 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Tuple, List
 
+from injection.scheludes.ready_schedules import InjectionSchedules
 from utils.enums import AdvNormMethods, InjectionTypes, AssitiveActors
 
 
@@ -43,9 +45,12 @@ class Hyperparams:
 
 
     # Injection hyperparams
-    injection_enabled: bool = False
-    injection_type: InjectionTypes = InjectionTypes.decremental
-    assistive_actor_type: AssitiveActors = AssitiveActors.mountaincar_basic
-    assist_duration_perc: float = 0.01
-    decrement_noise_std: float = 0.15
+    injection_enabled: bool = True
+    injection_type: InjectionTypes = InjectionTypes.scheduled
+    injection_schedule: InjectionSchedules = InjectionSchedules.sch2 # Only valid for InjectionTypes.scheduled
+    injection_verbose: bool = False
+
+    assistive_actor_type: AssitiveActors = AssitiveActors.mountaincar_basic # only valid for InjectionTypes.decremental
+    assist_duration_perc: float = 0.01 # only valid for InjectionTypes.decremental
+    decrement_noise_std: float = 0.15 # only valid for InjectionTypes.decremental
 

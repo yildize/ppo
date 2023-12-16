@@ -20,3 +20,4 @@ class NoiseUpdateFreq(enum.IntEnum):
 
 class InjectionTypes(enum.IntEnum):
     decremental = 0
+    scheduled = 1

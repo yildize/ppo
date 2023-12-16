@@ -34,7 +34,7 @@ class DecrementalInjector(BaseActionInjector):
         self.assist_w = assist_w
         action = assist_w*recommended_action + (1-assist_w)*actor_action
         log_prob_a = action_dist.log_prob(action)
-        return action, log_prob_a
+        return action.numpy(), log_prob_a.item()
 
     def __current_assistant_w(self, current_time_step):
         """ This method will return the weight of assistant actor. Which will start from about 0.3 and noisly reduce

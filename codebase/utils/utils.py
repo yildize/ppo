@@ -66,6 +66,7 @@ class PerformanceLogger:
         self.avg_eps_lens:List[float] = []  # avg episode lengths for each rollout
         self.avg_eps_rews:List[float] = []  # avg episode rewards for each rollout.
         self.timesteps: List[int] = [] # value of timestep for each recording.
+        self.injection_step_ranges: List[Tuple[int,int]] = [] # Stores a tuple representing each injection step range.
 
     def add(self, avg_episodic_lengths: float, avg_episodic_rewards: float, timestep:int):
         """ Adds a new rollout performance data"""

@@ -13,11 +13,11 @@ class BaseActionInjector(ABC):
     """ This is the base class that will be inherited by action injectors. This class should provide
     required objects and methods, also it should provide an interface to be followed."""
 
-    def __init__(self, actor:torch.nn.Module, multivariate_gauss_dist:MultivariateGaussianDist, total_timesteps:int, assitive_actor_type:AssitiveActors, episode_counter:List[int]):
+    def __init__(self, actor:torch.nn.Module, multivariate_gauss_dist:MultivariateGaussianDist, total_timesteps:int, episode_counter:List[int],  assitive_actor_type:AssitiveActors = None):
         self.actor = actor
         self.multivariate_gauss_dist = multivariate_gauss_dist
         self.total_timesteps = total_timesteps
-        self.assistive_actor = AssitiveActorFactory.create(assitive_actor_type)
+        self.assistive_actor = AssitiveActorFactory.create(assitive_actor_type) if assitive_actor_type is not None else None
         self._episode_counter = episode_counter
 
     @abstractmethod

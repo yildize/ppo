@@ -8,6 +8,7 @@ import random
 
 from injection.base_action_injector import BaseActionInjector
 from injection.decremental_injector import DecrementalInjector
+from injection.scheduled_injector import ScheduledInjector
 from utils.enums import InjectionTypes
 from utils.render_wrapper import RenderWrapper
 from utils.utils import MultivariateGaussianDist, PerformanceLogger, batchify
@@ -60,21 +61,35 @@ class PPO:
         self.episode_count = [0]
 
 
+    def __configure_injector(self, total_timesteps):
+        self.injector = None
+        if self.hyperparams.injection_enabled:
+            if self.hyperparams.injection_type == InjectionTypes.decremental:
+                self.injector = DecrementalInjector(actor=self.actor_critic_networks.actor,
+                                                    multivariate_gauss_dist=self.multivariate_gauss_dist,
+                                                    total_timesteps=total_timesteps,
+                                                    assitive_actor_type=self.hyperparams.assistive_actor_type,
+                                                    episode_counter=self.episode_count,
+                                                    assist_duration_perc=self.hyperparams.assist_duration_perc,
+                                                    decrement_noise_std=self.hyperparams.decrement_noise_std)
+            elif self.hyperparams.injection_type == InjectionTypes.scheduled:
+                if self.hyperparams.injection_enabled and self.hyperparams.injection_type == InjectionTypes.scheduled:
+                    self.injector: ScheduledInjector = ScheduledInjector(actor=self.actor_critic_networks.actor,
+                                                      multivariate_gauss_dist=self.multivariate_gauss_dist,
+                                                      total_timesteps=total_timesteps,
+                                                      episode_counter=self.episode_count,
+                                                      env=self.env, verbose=self.hyperparams.injection_verbose,
+                                                      schedule_enum=self.hyperparams.injection_schedule)
+
+                    # Record injection step ranges to perf logger to plot
+                    for period in self.injector.schedule.injection_periods:
+                        self.perf_logger.injection_step_ranges.append((period.step_start, period.step_end))
 
 
     def learn(self, total_timesteps, verbose=True):
         """ This is the method where learning magic happens. All the high level PPO logic happens here. I have abstracted detailed calculations inside the rollout_computer."""
 
-        # Injector
-        self.injector = None
-        if self.hyperparams.injection_enabled and self.hyperparams.injection_type == InjectionTypes.decremental:
-            self.injector = DecrementalInjector(actor=self.actor_critic_networks.actor,
-                                                multivariate_gauss_dist=self.multivariate_gauss_dist,
-                                                total_timesteps=total_timesteps,
-                                                assitive_actor_type=self.hyperparams.assistive_actor_type,
-                                                episode_counter=self.episode_count,
-                                                assist_duration_perc=self.hyperparams.assist_duration_perc,
-                                                decrement_noise_std=self.hyperparams.decrement_noise_std)
+        self.__configure_injector(total_timesteps=total_timesteps)
 
         self.actor_critic_networks.total_timesteps = total_timesteps # this will be used to update learning rate by time.
         self.multivariate_gauss_dist.total_timesteps = total_timesteps # this will be used to update std by time.
@@ -105,7 +120,7 @@ class PPO:
             else:
                 A = self.rollout_computer.gae(rewards=rollout.rewards, values=V.detach(), last_state_val=self.actor_critic_networks.critic(torch.from_numpy(rollout.next_states[-1]).float()).detach(),  dones=rollout.dones, gamma=self.hyperparams.gamma, gae_lambda=self.hyperparams.gae_lambda, normalize=self.hyperparams.adv_norm_method)
 
-            self.timestep += len(rollout) # update timestep
+            # self.timestep += len(rollout) # I instead update the timestep after each env.step()
             rollout_no += 1  # update current rollout no
 
             # For each rollout, we'll be using the samples repeatedly to increase sample efficiency with the help of clipped ppo loss preventing destructive updates.
@@ -158,11 +173,13 @@ class PPO:
 
         # Create a rollout buffer to store transitions and a rollout log to store episode lengths and rewards
         rollout_buffer = RolloutBuffer()
-
+        self.env.inactive_rendering() # by default render is inactivated.
         # Play episodes until we collect enough samples for a rollout. A rollout can contain data from multiple episodes.
         t = 0
         eps_lens, eps_rews = [], []
         while t < self.hyperparams.rollout_len:
+            # Rendering should be done before reset, so I check if current injector requries a rendering or not
+            self.__check_render_required()
             s,_ = self.env.reset(seed=random.randint(0, 100000))
             episode_len, total_episode_reward = self.play_an_episode(s=s, rollout_buffer=rollout_buffer)
             self.episode_count[0] += 1  # increase the total number of episodes played so far.
@@ -188,6 +205,7 @@ class PPO:
 
             # Take a step in the environment
             s_next, r, done, truncated, _ = self.env.step(action)
+            self.timestep += 1
 
             # Store the transitions later we'll be learning from those
             rollout_buffer.add_transition(state=s, action=action, action_log_prob=log_prob_a, next_state=s_next,reward=r, done=done, truncated=truncated)
@@ -217,3 +235,8 @@ class PPO:
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = True
 
+    def __check_render_required(self):
+        if self.injector and hasattr(self.injector, "schedule"):
+            self.injector: ScheduledInjector
+            period = self.injector.schedule.get_current_injection(self.timestep)
+            if period is not None and period.render: self.env.activate_rendering()

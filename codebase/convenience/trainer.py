@@ -59,6 +59,7 @@ class Trainer:
         if env.normalize_obs: env.save_obs_rms(filename=os.path.join(path_to_session_folder, f"obs_rms_{session_train_index}"))
 
         # Finally save the hyperparams
+        hyperparams.injection_schedule = hyperparams.injection_schedule.name # It is not used in demo, so just convert object to str, otherwise problems occur.
         hyperparams_dict = asdict(hyperparams)
         with open(os.path.join(path_to_session_folder, f"hyperparams_{session_train_index}.json"), 'w') as f:
             json.dump(hyperparams_dict, f, indent=4)

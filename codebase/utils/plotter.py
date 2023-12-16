@@ -1,10 +1,12 @@
+import os
+
 import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 from typing import List, Tuple
 
 from utils.utils import PerformanceLogger
-
+import pickle
 
 class Plotter:
     """ This class simply plots the provided PPO training logs. Since I will be providing logs consisting of different
@@ -55,6 +57,16 @@ class Plotter:
         plt.figure(figsize=(12, 6))
         plt.plot(common_timesteps, mean_rewards, label='Mean Episodic Reward')
         plt.fill_between(common_timesteps, mean_rewards - std_rewards, mean_rewards + std_rewards, alpha=0.2, label='Std Dev')
+
+        # Injections
+        # First, check if all logs have the same injection_step_ranges
+        if not all(log.injection_step_ranges == logs[0].injection_step_ranges for log in logs): raise ValueError("All logs must have the same injection_step_ranges")
+        for start, end in logs[0].injection_step_ranges:
+            plt.axvline(x=start, color='r', linestyle='--', alpha=0.7)
+            plt.axvline(x=end, color='r', linestyle='--', alpha=0.7)
+            plt.text((start + end) / 2, plt.ylim()[1], 'Injection', horizontalalignment='center', color='r', alpha=0.7)
+
+
         # Set larger font size for y-ticks
         plt.yticks(fontsize=15)  # You can adjust the size as needed
         # Annotate the final y-value
@@ -73,5 +85,27 @@ class Plotter:
         plt.grid(visible=True, linestyle='--', linewidth=0.5, alpha=0.7)
         plt.savefig(save_path)
 
+        # Save the Figure object for later manipulation
+        file_path, _ = os.path.splitext(save_path)
+        with open(file_path+'.pkl', 'wb') as file:
+            pickle.dump(plt.gcf(), file)
+
+        plt.close()
 
 
+
+
+"""
+# Load the saved figure object
+with open(pickle_path, 'rb') as file:
+    fig = pickle.load(file)
+
+# Now you can manipulate the figure
+fig.suptitle("New Title")
+
+# To display the modified plot
+plt.show(fig)
+
+# If you want to save the modified plot
+fig.savefig("modified_plot.png")
+"""

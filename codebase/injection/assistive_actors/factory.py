@@ -1,4 +1,4 @@
-from injection.assistive_actors.mountaincar import DummyMountainCarAssitiveActor, JoystickAssistiveActor
+from injection.assistive_actors.mountaincar import DummyMountainCarAssitiveActor, JoystickMountainCarAssistiveActor
 from utils.enums import AssitiveActors
 
 
@@ -8,4 +8,4 @@ class AssitiveActorFactory:
         if assitive_actor is AssitiveActors.mountaincar_basic:
             return DummyMountainCarAssitiveActor()
         elif assitive_actor is AssitiveActors.mountaincar_joystick:
-            return JoystickAssistiveActor()
+            return JoystickMountainCarAssistiveActor()
