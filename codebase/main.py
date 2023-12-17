@@ -14,12 +14,20 @@ if __name__ == "__main__":
     # # Default parameters are the best performer configuration for me.
     hyperparams_list = [Hyperparams(seed=seed, learn_std=False, max_episode_len=500, normalize_obs=True, adv_norm_method=AdvNormMethods.range_scale) for seed in seeds]
 
+    # hyperparams = []
+    # for seed in seeds:
+    #     for adv_norm_method in (AdvNormMethods.normalize, AdvNormMethods.not_normalize, AdvNormMethods.range_scale):
+    #         for learn_std in (True, False):
+    #             for batchify in (True, False):
+    #                 hyperparams.append(Hyperparams(seed=seed, learn_std=learn_std, max_episode_len=500, normalize_obs=True, adv_norm_method=adv_norm_method, batchify=batchify))
+    #
+
     hyperparams = []
     for seed in seeds:
-        for adv_norm_method in (AdvNormMethods.normalize, AdvNormMethods.not_normalize, AdvNormMethods.range_scale):
-            for learn_std in (True, False):
+            for learn_std in (False, True):
                 for batchify in (True, False):
-                    hyperparams.append(Hyperparams(seed=seed, learn_std=learn_std, max_episode_len=500, normalize_obs=True, adv_norm_method=adv_norm_method, batchify=batchify))
+                    hyperparams.append(Hyperparams(seed=seed, learn_std=learn_std, max_episode_len=500, normalize_obs=True, adv_norm_method=AdvNormMethods.range_scale, batchify=batchify,
+                                                   injection_enabled=True))
 
 
     # Now provide the list of environment names to train.
