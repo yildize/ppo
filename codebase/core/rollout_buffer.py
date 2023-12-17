@@ -8,6 +8,7 @@ class RolloutBuffer:
 
     def __init__(self):
         self.states:List[np.ndarray] = [] # (rollout_len, dimension of observation)
+        self.unnormalized_states: List[np.ndarray] = []  # (rollout_len, dimension of observation)
         self.actions:List[np.ndarray] = [] # (rollout_len, dimension of action)
         self.action_log_probs:List[float] = [] # (rollout_len)
         self.next_states:List[np.ndarray] = [] # (rollout_len)

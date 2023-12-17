@@ -6,7 +6,7 @@ import seaborn as sns
 
 class InsightPlots:
     """ This class help printing insightful plots helping debug the implementation"""
-    def __init__(self, A, states_tensor, actions_tensor, initial_log_probs_tensor, actor):
+    def __init__(self, A, states_tensor, unnormalized_states_tensor, actions_tensor, initial_log_probs_tensor, actor):
         # Separate the data based on negative and positive velocities
         self.A = A
         self.states_tensor = states_tensor
@@ -14,8 +14,11 @@ class InsightPlots:
         self.initial_log_probs = initial_log_probs_tensor
         self.actor = actor
 
-        self.neg_vels = states_tensor[:, 1] < 0
-        self.pos_vels = states_tensor[:, 1] >= 0
+        # Unnormalized states tensor is just will be used to obtain indexes
+        if unnormalized_states_tensor is None: unnormalized_states_tensor = states_tensor
+
+        self.neg_vels = unnormalized_states_tensor[:, 1] < 0
+        self.pos_vels = unnormalized_states_tensor[:, 1] >= 0
 
         self.neg_vel_states = states_tensor[self.neg_vels]
         self.pos_vel_states = states_tensor[self.pos_vels]
@@ -38,6 +41,7 @@ class InsightPlots:
         #self.plot_predicted_mean_actions()
         #self.plot_states_by_advantage()
         self.plot_mean_actions_and_advantages()
+        self.plot_state_distribution_colored()
 
 
 
@@ -184,6 +188,16 @@ class InsightPlots:
         plt.title('State Distribution with Velocity Counts')
         plt.xlabel('Position')
         plt.ylabel('Velocity')
+        plt.show()
+
+    def plot_state_distribution_colored(self):
+        """Plot the distribution of all states during the rollout."""
+        plt.figure(figsize=(10, 6))
+        sns.scatterplot(x=self.neg_vel_states[:, 0].numpy(), y=self.neg_vel_states[:, 1].numpy(), alpha=0.5)
+        sns.scatterplot(x=self.pos_vel_states[:, 0].numpy(), y=self.pos_vel_states[:, 1].numpy(), alpha=0.5)
+        plt.title('Rollout State Distribution')
+        plt.xlabel('Normalized Position')
+        plt.ylabel('Normalized Velocity')
         plt.show()
 
 

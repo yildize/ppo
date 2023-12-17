@@ -106,6 +106,10 @@ class PPO:
             states_tensor, actions_tensor, initial_log_probs_tensor = self.rollout_computer.convert_list_to_tensor(rollout.states), self.rollout_computer.convert_list_to_tensor(rollout.actions), self.rollout_computer.convert_list_to_tensor(rollout.action_log_probs)
             #[len(rollout), num_states], [len(rollout), num_actions], [len(rollout)]
 
+            # Optionally obtain unnormalized_states_tensor if exists, just for debugging purposes.
+            unnormalized_states_tensor = None
+            if len(rollout.unnormalized_states): unnormalized_states_tensor = self.rollout_computer.convert_list_to_tensor(rollout.unnormalized_states)
+
 
             # Calculate estimated Q(a,s) values for each state-action in the rollout
             monte_carlo_qas = self.rollout_computer.estimated_qas(next_states=rollout.next_states, rewards=rollout.rewards, dones=rollout.dones, truncateds=rollout.truncateds, critic=self.actor_critic_networks.critic, discount_factor=self.hyperparams.gamma) # grad_required False
@@ -123,7 +127,7 @@ class PPO:
                 A = self.rollout_computer.gae(rewards=rollout.rewards, values=V.detach(), last_state_val=self.actor_critic_networks.critic(torch.from_numpy(rollout.next_states[-1]).float()).detach(),  dones=rollout.dones, gamma=self.hyperparams.gamma, gae_lambda=self.hyperparams.gae_lambda, normalize=self.hyperparams.adv_norm_method)
 
 
-            ip = InsightPlots(A=A, states_tensor=states_tensor, actions_tensor=actions_tensor, initial_log_probs_tensor=initial_log_probs_tensor,
+            ip = InsightPlots(A=A, states_tensor=states_tensor, unnormalized_states_tensor=unnormalized_states_tensor, actions_tensor=actions_tensor, initial_log_probs_tensor=initial_log_probs_tensor,
                               actor=self.actor_critic_networks.actor)
 
             # self.timestep += len(rollout) # I instead update the timestep after each env.step()
@@ -209,6 +213,9 @@ class PPO:
             if self.injector is not None: action, log_prob_a = self.injector.inject_action(state=s, current_timestep=self.timestep)
             else: action, log_prob_a = self.actor_critic_networks.sample_an_action(state=s)
 
+            # Optionally add unnormalized observations to the buffer if they exist:
+            if self.hyperparams.normalize_obs and hasattr(self.env, "unnormalized_obs"): rollout_buffer.unnormalized_states.append(self.env.unnormalized_obs)
+
             # Take a step in the environment
             s_next, r, done, truncated, _ = self.env.step(action)
             self.timestep += 1
@@ -216,6 +223,7 @@ class PPO:
             # Store the transitions later we'll be learning from those
             rollout_buffer.add_transition(state=s, action=action, action_log_prob=log_prob_a, next_state=s_next,reward=r, done=done, truncated=truncated)
             episode_rewards.append(r)
+
 
             # Update state:
             s = s_next

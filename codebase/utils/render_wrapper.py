@@ -3,6 +3,8 @@ from gym.wrappers import NormalizeObservation
 import pickle
 import numpy as np
 
+from utils.normalize_obs import NormalizeObsAlternative
+
 
 class RenderWrapper:
     """ This method will help me add new functionalities to env without destructing its interface.
@@ -12,8 +14,8 @@ class RenderWrapper:
     def __init__(self, env_name:str, normalize_obs=False):
         self.env_name = env_name
         self.normalize_obs = normalize_obs
-        self._env = NormalizeObservation(gym.make(env_name)) if normalize_obs else gym.make(env_name) # Original env.
-        self._env_render = NormalizeObservation(gym.make(env_name, render_mode="human")) if normalize_obs else gym.make(env_name, render_mode="human")
+        self._env = NormalizeObsAlternative(gym.make(env_name)) if normalize_obs else gym.make(env_name) # Original env.
+        self._env_render = NormalizeObsAlternative(gym.make(env_name, render_mode="human")) if normalize_obs else gym.make(env_name, render_mode="human")
         if normalize_obs: self._env_render.obs_rms = self._env.obs_rms  # Let them use the exact same obs_rms to provide convenience
         self._active_env = self._env # by default active env is the no render one.
 
