@@ -90,6 +90,17 @@ class Plotter:
         with open(file_path+'.pkl', 'wb') as file:
             pickle.dump(plt.gcf(), file)
 
+
+        # Save data for later use
+        plot_data = {
+            'common_timesteps': common_timesteps,
+            'mean_rewards': mean_rewards,
+            'std_rewards': std_rewards
+        }
+        data_save_path = os.path.splitext(save_path)[0] + '_data.pkl'
+        with open(data_save_path, 'wb') as file:
+            pickle.dump(plot_data, file)
+
         plt.close()
 
 
