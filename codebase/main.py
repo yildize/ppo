@@ -9,7 +9,7 @@ from utils.utils import get_current_date_time_str
 if __name__ == "__main__":
 
     # Set your seeds
-    seeds = [5, 55, 555]#[1, 3333, 9449] # 3333 works fine?
+    seeds = [5, 55]#[1, 3333, 9449] # 3333 works fine?
 
 
     # hyperparams = []
@@ -45,17 +45,17 @@ if __name__ == "__main__":
 
     hyperparams = []
     for seed in seeds:
-            for batchify in (False, False):
-                        hyperparams.append(Hyperparams(seed=seed, learn_std=False, max_episode_len=500, normalize_obs=True,
-                                                       adv_norm_method=AdvNormMethods.range_scale, batchify=batchify, injection_enabled=True,
-                                                       injection_schedule=InjectionSchedules.sch2))
+        hyperparams.append(Hyperparams(seed=seed, learn_std=False, normalize_obs=False,
+                                      adv_norm_method=AdvNormMethods.normalize, batchify=False, injection_enabled=True,
+                                      injection_schedule=InjectionSchedules.sch3, max_episode_len=200))
+
 
 
     # Now provide the list of environment names to train.
     #MountainCarContinuous-v0
-    for env_name in ["MountainCarContinuous-v0"]:#["HalfCheetah-v4", "InvertedPendulum-v4", "InvertedDoublePendulum-v4", "Hopper-v4", "Reacher-v4", "Swimmer-v4", "Walker2d-v4", "LunarLanderContinuous-v2"]:
+    for env_name in ["LunarLanderContinuous-v2"]:#["HalfCheetah-v4", "InvertedPendulum-v4", "InvertedDoublePendulum-v4", "Hopper-v4", "Reacher-v4", "Swimmer-v4", "Walker2d-v4", "LunarLanderContinuous-v2"]:
         # Trainer will train the given environment for each hyperparams setup provided in the list. For this case only the seed is changed.
-        total_timesteps = 300_000
+        total_timesteps = 100_000
         trainer = Trainer(env_name=env_name, hyperparams_list=hyperparams, total_timesteps=total_timesteps)
         trainer.train(session_name=f"{env_name}_{total_timesteps}_{get_current_date_time_str()}") # performance plot result will be saved to the provided path.
 

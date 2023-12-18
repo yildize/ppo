@@ -1,3 +1,4 @@
+from injection.assistive_actors.lunarlander import JoystickLunarLanderAssistiveActor
 from injection.assistive_actors.mountaincar import DummyMountainCarAssitiveActor, JoystickMountainCarAssistiveActor, \
     PreTrainedMountainCarAssistiveActor
 from utils.enums import AssitiveActors
@@ -12,3 +13,5 @@ class AssitiveActorFactory:
             return JoystickMountainCarAssistiveActor()
         elif assitive_actor is AssitiveActors.mountaincar_pretrained:
             return PreTrainedMountainCarAssistiveActor()
+        elif assitive_actor is AssitiveActors.lunar_lander_joystick:
+            return JoystickLunarLanderAssistiveActor()

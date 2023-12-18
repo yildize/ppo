@@ -11,6 +11,7 @@ class AssitiveActors(enum.IntEnum):
     mountaincar_basic = 0
     mountaincar_joystick = 1
     mountaincar_pretrained = 2
+    lunar_lander_joystick = 3
 
 class NoiseUpdateFreq(enum.IntEnum):
     every_action = 0
