@@ -38,7 +38,7 @@ def plot_multiple_comparisons_with_injections(data_list, names, colors, injectio
 
     for data, name, color in zip(data_list, names, colors):
         # Plot mean rewards and standard deviation area
-        plt.plot(data['common_timesteps'], data['mean_rewards'], label=f'{name} Mean', color=color)
+        plt.plot(data['common_timesteps'], data['mean_rewards'], label=f'{name}', color=color)
         plt.fill_between(data['common_timesteps'],
                          data['mean_rewards'] - data['std_rewards'],
                          data['mean_rewards'] + data['std_rewards'], alpha=0.2, color=color)
