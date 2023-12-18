@@ -80,8 +80,11 @@ class InsightPlots:
         # Ensure no gradients are computed
         with torch.no_grad():
             # Get predicted mean actions and Advantage values for all states
-            predicted_means, _ = self.actor(self.states_tensor)
+            res = self.actor(self.states_tensor)
+            if isinstance(res, tuple):predicted_means = res[0]
+            else: predicted_means = res
             advantages = self.A.detach()
+
 
         # Convert to numpy for plotting
         predicted_means = predicted_means.numpy()
@@ -108,8 +111,8 @@ class InsightPlots:
         sc2 = axes[1].scatter(self.states_tensor[:, 0].numpy(), self.states_tensor[:, 1].numpy(), c=advantages, cmap='plasma', alpha=0.7)
         fig.colorbar(sc2, ax=axes[1], label='Advantage Value')
         axes[1].set_title('States Colored by Advantage Values')
-        axes[1].set_xlabel('Normalized Position')
-        axes[1].set_ylabel('Normalized Velocity')
+        axes[1].set_xlabel('Position')
+        axes[1].set_ylabel('Velocity')
 
         # Adjust the layout and display the plots
         plt.tight_layout()
@@ -156,8 +159,8 @@ class InsightPlots:
         scatter = plt.scatter(self.states_tensor[:, 0].numpy(), self.states_tensor[:, 1].numpy(), c=advantages, cmap='plasma', alpha=0.7)
         plt.colorbar(scatter, label='Advantage Value')
         plt.title('States Colored by Advantage Values')
-        plt.xlabel('Normalized Position')
-        plt.ylabel('Normalized Velocity')
+        plt.xlabel('Position')
+        plt.ylabel('Velocity')
         plt.show()
 
 
@@ -196,8 +199,8 @@ class InsightPlots:
         sns.scatterplot(x=self.neg_vel_states[:, 0].numpy(), y=self.neg_vel_states[:, 1].numpy(), alpha=0.5)
         sns.scatterplot(x=self.pos_vel_states[:, 0].numpy(), y=self.pos_vel_states[:, 1].numpy(), alpha=0.5)
         plt.title('Rollout State Distribution')
-        plt.xlabel('Normalized Position')
-        plt.ylabel('Normalized Velocity')
+        plt.xlabel('Position')
+        plt.ylabel('Velocity')
         plt.show()
 
 

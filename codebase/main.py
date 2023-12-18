@@ -45,8 +45,8 @@ if __name__ == "__main__":
 
     hyperparams = []
     for seed in seeds:
-            for batchify in (True, False):
-                        hyperparams.append(Hyperparams(seed=seed, learn_std=False, max_episode_len=500, normalize_obs=False,
+            for batchify in (False, False):
+                        hyperparams.append(Hyperparams(seed=seed, learn_std=False, max_episode_len=500, normalize_obs=True,
                                                        adv_norm_method=AdvNormMethods.range_scale, batchify=batchify, injection_enabled=True,
                                                        injection_schedule=InjectionSchedules.sch2))
 
