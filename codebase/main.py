@@ -39,8 +39,16 @@ if __name__ == "__main__":
 
     # # Set hyperparameter list. Each environment will be trained with each hyperparams setup in the list.
     # # Default parameters are the best performer configuration for me.
-    hyperparams = [Hyperparams(seed=seed, n_updates_per_iteration=0, learn_std=False, max_episode_len=500, normalize_obs=True, adv_norm_method=AdvNormMethods.range_scale,
-                                    injection_enabled=True, injection_schedule=InjectionSchedules.sch2) for seed in seeds]
+    # hyperparams = [Hyperparams(seed=seed, learn_std=False, max_episode_len=500, normalize_obs=False, adv_norm_method=AdvNormMethods.range_scale,
+    #                                 injection_enabled=True, injection_schedule=InjectionSchedules.sch2) for seed in seeds]
+
+
+    hyperparams = []
+    for seed in seeds:
+            for batchify in (True, False):
+                        hyperparams.append(Hyperparams(seed=seed, learn_std=False, max_episode_len=500, normalize_obs=False,
+                                                       adv_norm_method=AdvNormMethods.range_scale, batchify=batchify, injection_enabled=True,
+                                                       injection_schedule=InjectionSchedules.sch2))
 
 
     # Now provide the list of environment names to train.

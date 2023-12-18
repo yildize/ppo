@@ -42,6 +42,7 @@ class ScheduledInjector(BaseActionInjector):
         if active_period is not None:
             if self.__prev_period != active_period:  # If a new period is activated
                 print("New injection period activated: ", active_period)
+                print()
                 self.assistive_actor = AssitiveActorFactory.create(active_period.assistive_actor_type)
                 self._noise_update_freq, self._noise_std = active_period.noise_update_freq, active_period.noise_std
 
