@@ -129,10 +129,10 @@ class PPO:
                 A = self.rollout_computer.gae(rewards=rollout.rewards, values=V.detach(), last_state_val=self.actor_critic_networks.critic(torch.from_numpy(rollout.next_states[-1]).float()).detach(),  dones=rollout.dones, gamma=self.hyperparams.gamma, gae_lambda=self.hyperparams.gae_lambda, normalize=self.hyperparams.adv_norm_method)
 
 
-            ip = InsightPlots(A=A, states_tensor=states_tensor, unnormalized_states_tensor=unnormalized_states_tensor, actions_tensor=actions_tensor, initial_log_probs_tensor=initial_log_probs_tensor,
-                              actor=self.actor_critic_networks.actor)
-
-            ip.plot_all()
+            # ip = InsightPlots(A=A, states_tensor=states_tensor, unnormalized_states_tensor=unnormalized_states_tensor, actions_tensor=actions_tensor, initial_log_probs_tensor=initial_log_probs_tensor,
+            #                   actor=self.actor_critic_networks.actor)
+            #
+            # ip.plot_all()
 
             # self.timestep += len(rollout) # I instead update the timestep after each env.step()
             rollout_no += 1  # update current rollout no
@@ -171,12 +171,10 @@ class PPO:
             # Similarly we can update std deviation for the policy distribution to reduce exploration by time.
             self.multivariate_gauss_dist.update_cov_matrix(timestep=self.timestep)
 
-
-            ip = InsightPlots(A=A, states_tensor=states_tensor, unnormalized_states_tensor=unnormalized_states_tensor, actions_tensor=actions_tensor, initial_log_probs_tensor=initial_log_probs_tensor,
-                              actor=self.actor_critic_networks.actor)
-
-            ip.plot_all()
-
+            # ip = InsightPlots(A=A, states_tensor=states_tensor, unnormalized_states_tensor=unnormalized_states_tensor, actions_tensor=actions_tensor, initial_log_probs_tensor=initial_log_probs_tensor,
+            #                   actor=self.actor_critic_networks.actor)
+            #
+            # ip.plot_all()
 
 
             # Record rollout performance we'll be using them to obtain performance plots.
