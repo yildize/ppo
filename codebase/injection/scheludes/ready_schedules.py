@@ -5,7 +5,7 @@ from utils.enums import AssitiveActors
 
 
 SCH1 = InjectionSchedule(periods=[InjectionSchedule.InjectionPeriod(assistive_actor_type=AssitiveActors.mountaincar_basic,
-                                                                    step_start=0, step_end=25_000, assist_w_start=0,
+                                                                    step_start=0, step_end=50_000, assist_w_start=0,
                                                                     assist_w_end=0, noise_std=0.3,
                                                                     min_w=0, max_w=0.5,
                                                                     noise_update_freq=NoiseUpdateFreq.every_episode,
@@ -13,9 +13,9 @@ SCH1 = InjectionSchedule(periods=[InjectionSchedule.InjectionPeriod(assistive_ac
                          )
 
 SCH2 = InjectionSchedule(periods=[InjectionSchedule.InjectionPeriod(assistive_actor_type=AssitiveActors.mountaincar_basic,
-                                                                    step_start=0, step_end=100_000, assist_w_start=0.1,
-                                                                    assist_w_end=0.0, noise_std=0.25,
-                                                                    min_w=0, max_w=0.3,
+                                                                    step_start=0, step_end=500_000, assist_w_start=1,
+                                                                    assist_w_end=1, noise_std=0,
+                                                                    min_w=1, max_w=1,
                                                                     noise_update_freq=NoiseUpdateFreq.every_episode,
                                                                     render=False)])
 
