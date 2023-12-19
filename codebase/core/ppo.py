@@ -263,4 +263,4 @@ class PPO:
         if self.injector and hasattr(self.injector, "schedule"):
             self.injector: ScheduledInjector
             period = self.injector.schedule.get_current_injection(self.timestep)
-            if period is not None and period.render: self.env.activate_rendering()
+            if period is not None and period.render and self.injector.joystick.activate_render: self.env.activate_rendering()

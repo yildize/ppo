@@ -40,6 +40,11 @@ class Joystick:
         pygame.event.pump()
         return self.joystick.get_button(self.yes_button)
 
+    @property
+    def activate_render(self):
+        pygame.event.pump()
+        return self.joystick.get_button(self.no_button)
+
     def wait_for_button_press(self, info="Please press any joystick button.", max_wait_time_s=5):
         st = time.time()
         print(info)

@@ -47,7 +47,7 @@ if __name__ == "__main__":
     for seed in seeds:
         hyperparams.append(Hyperparams(seed=seed, learn_std=False, normalize_obs=False,
                                       adv_norm_method=AdvNormMethods.normalize, batchify=False, injection_enabled=True,
-                                      injection_schedule=InjectionSchedules.sch3, max_episode_len=200))
+                                      injection_schedule=InjectionSchedules.sch2, max_episode_len=400))
 
 
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     #MountainCarContinuous-v0
     for env_name in ["LunarLanderContinuous-v2"]:#["HalfCheetah-v4", "InvertedPendulum-v4", "InvertedDoublePendulum-v4", "Hopper-v4", "Reacher-v4", "Swimmer-v4", "Walker2d-v4", "LunarLanderContinuous-v2"]:
         # Trainer will train the given environment for each hyperparams setup provided in the list. For this case only the seed is changed.
-        total_timesteps = 100_000
+        total_timesteps = 300_000
         trainer = Trainer(env_name=env_name, hyperparams_list=hyperparams, total_timesteps=total_timesteps)
         trainer.train(session_name=f"{env_name}_{total_timesteps}_{get_current_date_time_str()}") # performance plot result will be saved to the provided path.
 

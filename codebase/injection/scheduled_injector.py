@@ -4,6 +4,7 @@ import torch
 from injection.assistive_actors.factory import AssitiveActorFactory
 from injection.assistive_actors.mountaincar import BaseMountainCarAssistiveActor
 from injection.base_action_injector import BaseActionInjector
+from injection.joystick import Joystick
 from injection.scheludes import ready_schedules
 from injection.scheludes.injection_schedule import InjectionSchedule
 from injection.scheludes.ready_schedules import InjectionSchedules
@@ -36,9 +37,14 @@ class ScheduledInjector(BaseActionInjector):
         self.__prev_noise = None
         self.__prev_assist_w = None
 
+        self.joystick = Joystick()
+
     def inject_action(self, state, current_timestep) -> Tuple:
         # First check if there is a current injection:
         active_period = self.schedule.get_current_injection(current_timestep)
+
+
+
         if active_period is not None:
             if self.__prev_period != active_period:  # If a new period is activated
                 print("New injection period activated: ", active_period)
@@ -49,10 +55,18 @@ class ScheduledInjector(BaseActionInjector):
             assist_w_raw = self.schedule.get_current_w(active_period, current_timestep)
             self.__update_noise() # updates self._noise depending on the update_freq
             assist_w = torch.clip(assist_w_raw + self._noise, min=active_period.min_w, max=active_period.max_w)
-            recommended_action = self.assistive_actor.get_action(state=state)
-            actor_action, action_dist = self.sample_actor_action(state=state)
-            action = assist_w * recommended_action + (1 - assist_w) * actor_action
-            self.__prev_assist_w = assist_w
+
+            if self.joystick.activate_injection:
+                # If button is not pressed, the assitive weight is zero so agent is all alone!
+                recommended_action = self.assistive_actor.get_action(state=state)
+                actor_action, action_dist = self.sample_actor_action(state=state)
+                action = assist_w * recommended_action + (1 - assist_w) * actor_action
+                self.__prev_assist_w = assist_w
+            else:
+                actor_action, action_dist = self.sample_actor_action(state=state)
+                action = actor_action
+
+
         else: # No active period, thus act only considering the agent itself.
             if self.__prev_period is not None and active_period is None:
                 print("Assistant schedule period is ended, control is on the Agent!")

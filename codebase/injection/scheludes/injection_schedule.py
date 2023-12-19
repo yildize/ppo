@@ -34,6 +34,7 @@ class InjectionSchedule:
             if period.step_start <= timestep <= period.step_end:
                 return period
         return None
+
     def get_assistive_actor(self, period:InjectionPeriod):
         AssitiveActorFactory.create(assitive_actor=period.assistive_actor_type)
 
