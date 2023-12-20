@@ -27,7 +27,7 @@ if __name__ == "__main__":
             for normalize_obs in (True, False):
                 for batchify in (True, False):
                     for adv_norm_method in AdvNormMethods:
-                        hyperparams.append(Hyperparams(injection_enabled=True, injection_schedule=InjectionSchedules.sch1,
+                        hyperparams.append(Hyperparams(injection_enabled=False, injection_schedule=InjectionSchedules.sch1,
                                                        seed=seed, learn_std=False, normalize_obs=normalize_obs,
                                                        adv_norm_method=adv_norm_method, batchify=batchify,
                                                        max_episode_len=500))
@@ -40,6 +40,6 @@ if __name__ == "__main__":
     else:
         # Demonstrator uses the provided model (the model put inside the models/<env_name>/demo/) and runs num_episodes in a rendered way just for demo purposes.
         # Also do not forget to provide hyperparams config file and the obs_rms if observation is normalized (you can obtain them from logs)
-        demonstrator = Demonstrator(env_name=env_name, num_episodes=5, render=True)
+        demonstrator = Demonstrator(env_name=env_name, num_episodes=3, render=True)
         demonstrator.play()
 
