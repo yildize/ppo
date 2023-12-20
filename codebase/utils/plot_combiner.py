@@ -20,9 +20,10 @@ assistive_file_path = 'D:\EBackup\ppo-injection\ppo\codebase\logs\INJECTION-EFFE
 
 
 # Define a function to plot the comparison
-def plot_multiple_comparisons_with_injections(data_list, names, colors, injections, title, save_path):
+def plot_multiple_comparisons_with_injections(data_list, names, colors, injections, title, save_path, scale=1.81):
     """
     Plot multiple sets of data on the same graph, including mean, standard deviation, and injection periods.
+    A scaling factor is applied to text sizes to make them suitable for a two-column format e-report.
 
     :param data_list: List of data dictionaries, each containing 'common_timesteps', 'mean_rewards', 'std_rewards'
     :param names: List of names for the legend labels corresponding to each data set
@@ -30,11 +31,12 @@ def plot_multiple_comparisons_with_injections(data_list, names, colors, injectio
     :param injections: List of tuples, each containing (injection_start_timestep, injection_end_timestep, label_str)
     :param title: The title of the plot
     :param save_path: Path where to save the plot image
+    :param scale: Scaling factor for text sizes (default is 1.0)
     """
     if len(data_list) != len(names) or len(names) != len(colors):
         raise ValueError("Length of data_list, names, and colors must be the same.")
 
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(12, 6))  # Scale figure size
 
     for data, name, color in zip(data_list, names, colors):
         # Plot mean rewards and standard deviation area
@@ -47,25 +49,27 @@ def plot_multiple_comparisons_with_injections(data_list, names, colors, injectio
         final_y_value = data['mean_rewards'][-1]
         plt.annotate(f'{final_y_value:.2f}',
                      xy=(data['common_timesteps'][-1], final_y_value),
-                     xytext=(10, 0),  # This offsets the text slightly to the right
+                     xytext=(10 * scale, 0),  # Scale text offset
                      textcoords='offset points',
                      ha='center',
-                     va='bottom', #if color=="GREEN" else "top",
-                     fontsize=12,
-                     color=color)  # Adjust font size as needed
+                     va='bottom' if color=="GREEN" else "top",
+                     fontsize=12 * scale,  # Scale font size
+                     color=color)
 
     # Add vertical lines for injections
     for start, end, label in injections:
         plt.axvline(x=start, color='k', linestyle=':', alpha=0.7)
         plt.axvline(x=end, color='k', linestyle=':', alpha=0.7)
-        plt.text((start + end) / 2, plt.ylim()[1] * 0.95, label, horizontalalignment='center', verticalalignment='top', color='k', alpha=0.7, rotation=90)
+        plt.text((start + end) / 2, plt.ylim()[1] * 0.95, label, horizontalalignment='center',
+                 verticalalignment='top', color='k', alpha=0.7, rotation=90, fontsize=10 * scale)  # Scale font size
 
-    plt.title(title)
-    plt.xlabel('Timesteps')
-    plt.ylabel('Average Rollout Reward')
-    plt.legend()
+    plt.title(title, fontsize=14 * scale)  # Scale title font size
+    plt.xlabel('Timesteps', fontsize=12 * scale)  # Scale x-axis label font size
+    plt.ylabel('Average Rollout Reward', fontsize=12 * scale)  # Scale y-axis label font size
+    plt.legend(fontsize=10 * scale)  # Scale legend font size
     plt.grid(visible=True, linestyle='--', linewidth=0.5, alpha=0.7)
-    plt.savefig(save_path)
+    plt.tick_params(axis='both', which='major', labelsize=10 * scale)  # Scale axis tick labels
+    plt.savefig(save_path, bbox_inches='tight')  # Save figure with tight bounding box
     plt.show()
 
     return save_path
