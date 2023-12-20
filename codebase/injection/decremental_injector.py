@@ -8,7 +8,8 @@ from typing import Tuple, List
 
 
 class DecrementalInjector(BaseActionInjector):
-    """"""
+    """ This is an outdated injector. It is mainly used for specific injection strategy (decremental noisy injection) only.
+    The scheduled injector is a more advanced version that can handle different strategies. """
     assistive_actor: BaseMountainCarAssistiveActor
 
     def __init__(self, actor: torch.nn.Module, multivariate_gauss_dist: MultivariateGaussianDist, total_timesteps: int, assitive_actor_type: AssitiveActors,
@@ -27,6 +28,8 @@ class DecrementalInjector(BaseActionInjector):
         self.assist_w = None
 
     def inject_action(self, state, current_timestep) -> Tuple:
+        """ In returns the required action (can be injected or not) utilizing the current state, current timestep,
+        the assistive actor, and the actual actor."""
         recommended_action = self.assistive_actor.get_action(state=state)
         actor_action, action_dist = self.sample_actor_action(state=state)
 

@@ -43,8 +43,6 @@ class InsightPlots:
         self.plot_mean_actions_and_advantages()
         self.plot_state_distribution_colored()
 
-
-
     def plot_advantage_comparison_box(self):
         # Data preparation
         neg_advantages = self.neg_vel_advantages.numpy()
@@ -74,7 +72,6 @@ class InsightPlots:
         plt.title('Comparison of Advantage Values')
         plt.ylabel('Advantage')
         plt.show()
-
 
     def plot_mean_actions_and_advantages(self):
         # Ensure no gradients are computed
@@ -117,7 +114,6 @@ class InsightPlots:
         # Adjust the layout and display the plots
         plt.tight_layout()
         plt.show()
-
 
     def plot_predicted_mean_actions(self):
         """Plot the predicted mean actions from the actor network at different states,
@@ -273,136 +269,3 @@ class InsightPlots:
         plt.legend()
         plt.show()
 
-
-
-"""
-# Assuming these tensors are already defined:
-# states_tensor, actions_tensor, initial_log_probs_tensor, A
-
-# Separate the data based on negative and positive velocities
-neg_vels = states_tensor[:, 1] < 0
-pos_vels = states_tensor[:, 1] >= 0
-
-neg_vel_states = states_tensor[neg_vels]
-pos_vel_states = states_tensor[pos_vels]
-
-neg_vel_advantages = A[neg_vels]
-pos_vel_advantages = A[pos_vels]
-
-neg_vel_actions = actions_tensor[neg_vels]
-pos_vel_actions = actions_tensor[pos_vels]
-
-neg_vel_log_probs = initial_log_probs_tensor[neg_vels]
-pos_vel_log_probs = initial_log_probs_tensor[pos_vels]
-
-# Convert log probabilities to probabilities
-neg_vel_probs = torch.exp(neg_vel_log_probs)
-pos_vel_probs = torch.exp(pos_vel_log_probs)
-
-# Plotting
-
-# 1. Comparing Advantage Values for Negative and Positive Velocity States
-plt.figure(figsize=(10, 6))
-sns.boxplot(data=[neg_vel_advantages.numpy(), pos_vel_advantages.numpy()], 
-            notch=True, 
-            palette="Set2")
-plt.xticks([0, 1], ['Negative Velocity', 'Positive Velocity'])
-plt.title('Comparison of Advantage Values')
-plt.ylabel('Advantage')
-plt.show()
-"""
-
-
-
-"""
-# 2. Actions Taken in Negative and Positive Velocity States
-plt.figure(figsize=(10, 6))
-plt.hist([neg_vel_actions.numpy().flatten(), pos_vel_actions.numpy().flatten()], 
-         bins=30, alpha=0.7, label=['Negative Velocity', 'Positive Velocity'])
-plt.title('Actions Distribution for Negative and Positive Velocity States')
-plt.xlabel('Action Value')
-plt.ylabel('Frequency')
-plt.legend()
-plt.show()
-"""
-
-
-"""
-# 3. Probabilities of Actions in Negative and Positive Velocity States
-plt.figure(figsize=(10, 6))
-plt.hist([neg_vel_probs.numpy(), pos_vel_probs.numpy()], bins=30, alpha=0.7, label=['Negative Velocity', 'Positive Velocity'])
-plt.title('Action Probabilities for Negative and Positive Velocity States')
-plt.xlabel('Probability of Action')
-plt.ylabel('Frequency')
-plt.legend()
-plt.show()
-"""
-
-
-"""
-# Assuming the actor network is accessed as self.actor_critic_networks.actor
-# and it returns a tuple (mean action, standard deviation) for given states
-
-# Get actor predictions for negative and positive velocity states
-neg_vel_actions_pred, _ = self.actor_critic_networks.actor(neg_vel_states)
-pos_vel_actions_pred, _ = self.actor_critic_networks.actor(pos_vel_states)
-
-# Detach the predictions from the computation graph and convert to numpy for plotting
-neg_vel_actions_pred = neg_vel_actions_pred.detach().numpy()
-pos_vel_actions_pred = pos_vel_actions_pred.detach().numpy()
-
-# Plotting
-
-# Scatter plot of actor predictions for negative and positive velocities
-plt.figure(figsize=(10, 6))
-plt.scatter(neg_vel_states[:, 0].numpy(), neg_vel_actions_pred, label='Negative Velocity', alpha=0.7)
-plt.scatter(pos_vel_states[:, 0].numpy(), pos_vel_actions_pred, label='Positive Velocity', alpha=0.7)
-plt.title('Actor Predictions for Negative and Positive Velocity States')
-plt.xlabel('Position')
-plt.ylabel('Predicted Mean Action')
-plt.legend()
-plt.show()
-"""
-
-
-"""
-import seaborn as sns
-neg_vels = states_tensor[:, 1] < 0
-pos_vels = states_tensor[:, 1] >= 0
-
-neg_vel_states = states_tensor[neg_vels]
-pos_vel_states = states_tensor[pos_vels]
-
-neg_vel_advantages = A[neg_vels]
-pos_vel_advantages = A[pos_vels]
-
-neg_vel_actions = actions_tensor[neg_vels]
-pos_vel_actions = actions_tensor[pos_vels]
-
-neg_vel_log_probs = initial_log_probs_tensor[neg_vels]
-pos_vel_log_probs = initial_log_probs_tensor[pos_vels]
-
-# Convert log probabilities to probabilities
-neg_vel_probs = torch.exp(neg_vel_log_probs)
-pos_vel_probs = torch.exp(pos_vel_log_probs)
-
-neg_vel_actions_pred, _ = self.actor_critic_networks.actor(neg_vel_states)
-pos_vel_actions_pred, _ = self.actor_critic_networks.actor(pos_vel_states)
-
-# Detach the predictions from the computation graph and convert to numpy for plotting
-neg_vel_actions_pred = neg_vel_actions_pred.detach().numpy()
-pos_vel_actions_pred = pos_vel_actions_pred.detach().numpy()
-
-# Plotting
-
-# Scatter plot of actor predictions for negative and positive velocities
-plt.figure(figsize=(10, 6))
-plt.scatter(neg_vel_states[:, 0].numpy(), neg_vel_actions_pred, label='Negative Velocity', alpha=0.1)
-plt.scatter(pos_vel_states[:, 0].numpy(), pos_vel_actions_pred, label='Positive Velocity', alpha=0.1)
-plt.title('Actor Predictions for Negative and Positive Velocity States')
-plt.xlabel('Position')
-plt.ylabel('Predicted Mean Action')
-plt.legend()
-plt.show()
-
-"""

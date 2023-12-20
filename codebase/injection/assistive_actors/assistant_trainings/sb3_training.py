@@ -3,6 +3,9 @@ from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import VecNormalize
 
+
+# THIS SCRIPT IS NOT UTILIZED MUCH, THE IDEA WAS TO UTILIZE PRETRAINED SB3 ACTORS AS ASSISTANTS, MAYBE IN FUTURE.
+
 # Create and Wrap the Environment
 env_name = "MountainCarContinuous-v0"
 env = make_vec_env(env_name, n_envs=1)

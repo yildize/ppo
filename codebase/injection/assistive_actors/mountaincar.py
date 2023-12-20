@@ -13,23 +13,26 @@ class BaseMountainCarAssistiveActor(ABC):
     currently training agent."""
 
     def __init__(self):
-        self.x = None
-        self.v = None
+        self.x = None  # position state
+        self.v = None # velocity state
 
     def get_action(self, state):
+        """ All mountain car assistive actors will have this method, they will accept a state
+        and return an action based on their strategy."""
         self.state = state
         self.x, self.v = state[0], state[1]
         return self._action_strategy()
 
     @abstractmethod
     def _action_strategy(self):
+        """ Actual action strategy."""
         ...
 
 
 class DummyMountainCarAssitiveActor(BaseMountainCarAssistiveActor):
     """ This is the simplest mountain car actor that only reacts according to current
     velocity. It basically always tries to increase the abs(velocity) so that it can swing
-    This simple strategy achieves episode rewards of around 92."""
+    This simple strategy achieves episode rewards of around 91."""
     def __init__(self):
         super().__init__()
 
@@ -38,7 +41,9 @@ class DummyMountainCarAssitiveActor(BaseMountainCarAssistiveActor):
         else:rec_action=torch.tensor([1], dtype=torch.float32)
         return rec_action
 
+
 class PreTrainedMountainCarAssistiveActor(BaseMountainCarAssistiveActor):
+    """ This assistive actor utilizes a pretrained actor."""
 
     def __init__(self):
         super().__init__()
@@ -51,6 +56,7 @@ class PreTrainedMountainCarAssistiveActor(BaseMountainCarAssistiveActor):
             return self.actor(self.state)
 
     def __load_hyperparams_dict(self):
+        """ It loads the hyperparameter dict to re-initialize the required MLP for the actor."""
         # First read the hyperparams from the demo folder to reconstruct the actor:
         hyperparams_path = find_first_file_in_directory(directory_path=f"./injection/assistive_actors/pretrained/mountain_car", containing="hyperparams")
         if hyperparams_path is None: raise FileNotFoundError(f"Please place a hyperparams file inside the ./injection/assitive_actors/pretrained/mountain_car so that, assistive actor "
@@ -60,6 +66,7 @@ class PreTrainedMountainCarAssistiveActor(BaseMountainCarAssistiveActor):
         return hyperparams_dict
 
     def __create_empty_policy_network(self, ) -> torch.nn.Module:
+        """It recreates the actor network utilizing the loaded hyperparams"""
         # Construct the policy/actor network same with the saved model so that we can successfully load the weights.
         policy:torch.nn.Module = MLP(input_dim=2, output_dim=1,
                                      hidden_dim=self.hyperparams_dict["hidden_dim"], num_hidden_layers=self.hyperparams_dict["num_hidden_layers_actor"],
@@ -67,12 +74,10 @@ class PreTrainedMountainCarAssistiveActor(BaseMountainCarAssistiveActor):
         return policy
 
     def __load_demo_actor(self):
+        """Load the actor weights from file system."""
         model_path = find_first_file_in_directory(directory_path=f"./injection/assistive_actors/pretrained/mountain_car", containing="actor")
-
-
         # Load in the actor model saved by the PPO algorithm
         self.actor.load_state_dict(torch.load(model_path))
-
 
 
 class JoystickMountainCarAssistiveActor(BaseMountainCarAssistiveActor):

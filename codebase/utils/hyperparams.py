@@ -43,13 +43,13 @@ class Hyperparams:
     num_hidden_layers_critic: int = 2
     adv_norm_method: AdvNormMethods = AdvNormMethods.range_scale
 
-
     # Injection hyperparams
-    injection_enabled: bool = False
-    injection_type: InjectionTypes = InjectionTypes.scheduled
-    injection_schedule: InjectionSchedules = InjectionSchedules.sch1 # Only valid for InjectionTypes.scheduled
+    injection_enabled: bool = False  # controls whether injection is introduced. If that is false the remaining does not matter.
+    injection_type: InjectionTypes = InjectionTypes.scheduled # type of injector, scheduled is the most advanced one.
+    injection_schedule: InjectionSchedules = InjectionSchedules.sch1  # Select specific schedule. Only valid for InjectionTypes.scheduled
     injection_verbose: bool = False
 
+    # Rest is obsolete for the scheduled injection because those details are specified inside the schedule.
     assistive_actor_type: AssitiveActors = AssitiveActors.mountaincar_basic # only valid for InjectionTypes.decremental
     assist_duration_perc: float = 0.01 # only valid for InjectionTypes.decremental
     decrement_noise_std: float = 0.15 # only valid for InjectionTypes.decremental

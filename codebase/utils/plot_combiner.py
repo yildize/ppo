@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from typing import List
 
 
+# IT IS JUST A UTILITY SCRIPT TO OBTAIN/MODIFY PLOTS.
+
 # A function to load the data from a pickle file
 def load_data(file_path):
     with open(file_path, 'rb') as file:
@@ -15,8 +17,6 @@ def load_data(file_path):
 injective_ppo_file_path = 'D:\EBackup\ppo-injection\ppo\codebase\logs\INJECTION-EFFECT-300K\injective-ppo-data.pkl'
 ppo_file_path = 'D:\EBackup\ppo-injection\ppo\codebase\logs\INJECTION-EFFECT-300K\ppo-data.pkl'
 assistive_file_path = 'D:\EBackup\ppo-injection\ppo\codebase\logs\INJECTION-EFFECT-300K\\assistive-data.pkl'
-
-
 
 
 # Define a function to plot the comparison

@@ -28,9 +28,11 @@ class BaseActionInjector(ABC):
         ...
 
     def completed_training_frac(self, current_timestep):
+        """ Utility method returning the fraction of training."""
         return current_timestep/self.total_timesteps
 
     def sample_actor_action(self, state):
+        """Returns the actual actor action and the action_dist for the given state."""
         action_dist = self.get_action_dist(state)
         actor_action = action_dist.sample()
         return actor_action, action_dist
@@ -46,13 +48,13 @@ class BaseActionInjector(ABC):
         """ Just returns the actor action (the mean) for the provided state."""
         with torch.no_grad():
             res = self.actor(state)
-
+            # Should be suitable for both learn_std=True and learn_std=False
             if isinstance(res, tuple): mean, std = res
             else: mean, std = res, None
-
             # this will be the mean probs vector of shape (num_actions,)
             return mean, std
 
     @property
     def current_episode(self):
+        """ Returns current episode"""
         return self._episode_counter[0]

@@ -4,6 +4,8 @@ import numpy as np
 
 
 class NormalizeObsAlternative(NormalizeObservation):
+    """ This class is utilized to seamlessly normalize observations.
+    More specifically, it is used for demo purposes to keep the obs_rms frozen."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

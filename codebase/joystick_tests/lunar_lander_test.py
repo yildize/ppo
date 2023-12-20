@@ -4,6 +4,8 @@ import numpy as np
 from injection.joystick import Joystick
 from utils.render_wrapper import RenderWrapper
 
+# THIS SCRIPT IS JUST TO TEST JOYSTICK ON LUNAR LANDER ENVIRONMENT
+
 def stabilize_lander(observation, axis_steering, manual_control_intensity):
     """
     Stabilize the Lunar Lander based on its current angle and angular velocity.

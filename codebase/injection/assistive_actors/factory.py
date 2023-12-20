@@ -5,6 +5,7 @@ from utils.enums import AssitiveActors
 
 
 class AssitiveActorFactory:
+    """ This is a utility factor class that is used to instantiate required assistive actor objects"""
     @staticmethod
     def create(assitive_actor:AssitiveActors):
         if assitive_actor is AssitiveActors.mountaincar_basic:

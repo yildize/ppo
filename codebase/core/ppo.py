@@ -102,8 +102,6 @@ class PPO:
             # Collect a rollout
             rollout = self.collect_a_rollout()
 
-
-
             # Convert required lists to tensors
             states_tensor, actions_tensor, initial_log_probs_tensor = self.rollout_computer.convert_list_to_tensor(rollout.states), self.rollout_computer.convert_list_to_tensor(rollout.actions), self.rollout_computer.convert_list_to_tensor(rollout.action_log_probs)
             #[len(rollout), num_states], [len(rollout), num_actions], [len(rollout)]
@@ -129,9 +127,8 @@ class PPO:
                 A = self.rollout_computer.gae(rewards=rollout.rewards, values=V.detach(), last_state_val=self.actor_critic_networks.critic(torch.from_numpy(rollout.next_states[-1]).float()).detach(),  dones=rollout.dones, gamma=self.hyperparams.gamma, gae_lambda=self.hyperparams.gae_lambda, normalize=self.hyperparams.adv_norm_method)
 
 
-            # ip = InsightPlots(A=A, states_tensor=states_tensor, unnormalized_states_tensor=unnormalized_states_tensor, actions_tensor=actions_tensor, initial_log_probs_tensor=initial_log_probs_tensor,
-            #                   actor=self.actor_critic_networks.actor)
-            #
+            # Some advantage and state distribution debug plots, keep them commented.
+            # ip = InsightPlots(A=A, states_tensor=states_tensor, unnormalized_states_tensor=unnormalized_states_tensor, actions_tensor=actions_tensor, initial_log_probs_tensor=initial_log_probs_tensor, actor=self.actor_critic_networks.actor)
             # ip.plot_all()
 
             # self.timestep += len(rollout) # I instead update the timestep after each env.step()
@@ -171,10 +168,6 @@ class PPO:
             # Similarly we can update std deviation for the policy distribution to reduce exploration by time.
             self.multivariate_gauss_dist.update_cov_matrix(timestep=self.timestep)
 
-            # ip = InsightPlots(A=A, states_tensor=states_tensor, unnormalized_states_tensor=unnormalized_states_tensor, actions_tensor=actions_tensor, initial_log_probs_tensor=initial_log_probs_tensor,
-            #                   actor=self.actor_critic_networks.actor)
-            #
-            # ip.plot_all()
 
 
             # Record rollout performance we'll be using them to obtain performance plots.
@@ -233,7 +226,6 @@ class PPO:
             # Store the transitions later we'll be learning from those
             rollout_buffer.add_transition(state=s, action=action, action_log_prob=log_prob_a, next_state=s_next,reward=r, done=done, truncated=truncated)
             episode_rewards.append(r)
-
 
             # Update state:
             s = s_next

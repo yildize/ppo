@@ -3,6 +3,8 @@ import pygame
 
 
 class Joystick:
+    """ Utility module to seamlessly integrate joystick. Simply this module can allow easy access to
+    various joystick inputs and provide utility methods to interact with the joystick."""
 
     def __init__(self, yes_button:int=0, no_button:int=1):
         # Initialize Pygame and the joystick

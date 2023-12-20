@@ -11,10 +11,8 @@ class LunarLanderAssistiveActor(ABC):
     Assitive actors are basically rule based or more advanced actors that assists the
     currently training agent."""
 
-    def __init__(self):
-        ...
-
     def get_action(self, state):
+        """ All assistive actors will accept a state and return the action in return."""
         self.state = state
         return self._action_strategy()
 
@@ -24,26 +22,30 @@ class LunarLanderAssistiveActor(ABC):
 
 
 class JoystickLunarLanderAssistiveActor(LunarLanderAssistiveActor):
-    """ This assitive actor uses the axis0 and axis1 input from the joystick to provide actions"""
+    """ This assitive actor uses the axis0 and axis1 input from the joystick to provide actions. Also an additional stabilization
+    method is utilized to control the lunar lander easier, without this rule based stabilization method, it is almost impossible
+    to delicately control the lunar lander through joystick."""
+
     def __init__(self):
         super().__init__()
         self.joystick = Joystick()
 
     def _action_strategy(self):
-        time.sleep(0.05)
+        time.sleep(0.05)  # slow down time to make the task easier for human operator.
+
+        # Get joystick inputs
         axis_thrust = -self.joystick.axis_1
         axis_steering = self.joystick.axis_0
+        if axis_thrust < 0.03: axis_thrust = 0  # to prevent small residual commands on joystick
 
-        if axis_thrust < 0.03: axis_thrust = 0
         # Apply stabilization with consideration to manual control
         axis_steering = -self._stabilize_lander(self.state, -axis_steering, axis_steering)
 
-        action = [axis_thrust, axis_steering]
+        # Return the action
+        return torch.tensor([axis_thrust, axis_steering], dtype=torch.float32)
 
-        return torch.tensor(action, dtype=torch.float32)
-
-
-    def _stabilize_lander(self, observation, axis_steering, manual_control_intensity):
+    @staticmethod
+    def _stabilize_lander(observation, axis_steering, manual_control_intensity):
         """
         Stabilize the Lunar Lander based on its current angle and angular velocity.
         Less aggressive stabilization when there's manual control input.

@@ -25,37 +25,8 @@ class MLP(nn.Module):
         # Define learnable std params if specified
         if learn_std: self.log_std = nn.Parameter(torch.zeros(output_dim))
 
-    # def preprocess_obs(self, obs):
-    #     # Ensure obs is a NumPy array
-    #     obs = np.array(obs)
-    #
-    #     # Check if obs is valid
-    #     if obs is None or obs.size == 0:
-    #         raise ValueError("Input image is empty or None.")
-    #
-    #     # Convert to uint8 if necessary
-    #     if obs.dtype != np.uint8:
-    #         obs = obs.astype(np.uint8)
-    #
-    #     # Convert to grayscale
-    #     if len(obs.shape) == 3 and obs.shape[2] == 3:  # Check if the image has 3 channels
-    #         obs = cv2.cvtColor(obs, cv2.COLOR_RGB2GRAY)
-    #
-    #     # Resize the image
-    #     obs = cv2.resize(obs, (24, 24), interpolation=cv2.INTER_AREA)
-    #
-    #     # Normalize pixel values
-    #     obs = obs / 255.0
-    #     # Flatten the image
-    #     return obs.flatten()
-
     def forward(self, obs):
         """ Define the forward propagation logic. Torch will handle the gradient calculation. """
-
-        # # Preprocess observations if they're images
-        # if len(obs.shape) > 1:  # This assumes that non-image observations are already 1D
-        #     obs = self.preprocess_obs(obs)
-
         # Conversion from numpy array to torch tensor just in case:
         #obs = torch.tensor(obs, dtype=torch.float32) if isinstance(obs, np.ndarray) else obs
         obs = torch.as_tensor(obs, dtype=torch.float32)
